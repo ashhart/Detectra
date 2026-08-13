@@ -15,7 +15,10 @@ forensics on top.
 
 Measured **through the real extension** (Chrome for Testing + the exact
 service-worker WebGPU pipeline a user gets), at a 65% confidence decision
-threshold, on data the model never trained or calibrated on:
+threshold. WildRF-test and every difficult-reals set below are fully held out
+from training *and* calibration; the modern-generator eval pool informs
+threshold fitting only, never training (full split discipline:
+[eval/README.md](eval/README.md)):
 
 | Benchmark | Balanced accuracy @0.65 |
 |---|---|
@@ -24,24 +27,28 @@ threshold, on data the model never trained or calibrated on:
 | Modern-generator eval split — DALL·E 3, Midjourney, Flux, SD3.5, Recraft, HiDream, **plus GPT-4o & Ideogram which the model never saw in training** | **99.4%** (TPR 98.9%) |
 
 Detectors notoriously call human artwork "AI". We audited difficult *real*
-categories explicitly and trained them out (v3); TNR = % of real images
-correctly kept:
+categories explicitly and trained them out (v3). The evaluation images below
+never appear in training — they are held-out complements (disjoint file
+indices, dataset offsets, or website sets) of the categories v3 trained on.
+TNR = % of real images correctly kept:
 
-| Difficult reals (never in training) | TNR @0.65 |
+| Difficult reals (held out) | TNR @0.65 |
 |---|---|
-| Human paintings & drawings (WikiArt, n=2,400) | **99.8%** |
+| Human paintings & drawings (WikiArt, n=1,200) | **99.7%** |
 | Hand-drawn anime (n=250) | **100%** |
 | Memes (n=250) | **97.6%** |
 | Webpage screenshots (n=60) | **100%** |
 
 The Detectra model — published at
 [Vontra/detectra-v1](https://huggingface.co/Vontra/detectra-v1) — is our own
-fine-tune of the MIT-licensed
+fine-tune (v3) of the MIT-licensed
 [Community Forensics](https://github.com/JeongsooP/Community-Forensics) ViT-S/16
-(CVPR 2025), retrained on the current generation of image models with a
-web-realism augmentation policy (JPEG cascades, resize chains) and a replay
-slice of the original 4,800-generator corpus. Scores are Platt-calibrated so
-the 0.65 decision threshold sits at the balanced-accuracy optimum.
+(CVPR 2025), retrained on the current generation of image models *and* the
+difficult-real categories above, with a web-realism augmentation policy (JPEG
+cascades, resize chains) and a replay slice of the original 4,800-generator
+corpus. Scores are Platt-calibrated with the 0.65 decision threshold pinned at
+a constraint-checked operating point that must satisfy every real category
+simultaneously — not a single blended optimum.
 Holdout discipline: GPT-4o and Ideogram never appear in training; WildRF-test
 is never touched by training *or* calibration.
 
@@ -109,9 +116,13 @@ every analyzed `<img>`:
 uv venv tools/.venv --python 3.12
 uv pip install --python tools/.venv/bin/python -r tools/requirements.txt
 
-# 2. Assemble training/eval data from public sources (streams from HF + COCO + WildRF)
-tools/.venv/bin/python eval/build_dataset.py --per-source 300
+# 2. Assemble training/eval data from public sources
+tools/.venv/bin/python eval/build_dataset.py --per-source 300            # modern-gen fakes + COCO reals
 tools/.venv/bin/python eval/build_dataset.py --only cfreplay_ai,cfreplay_real --per-source 1500
+tools/.venv/bin/gdown 1A0xoL44Yg68ixd-FuIJn2VC4vdZ6M2gn -O eval/data/wildrf.zip && unzip -q eval/data/wildrf.zip -d eval/data  # WildRF
+HF_TOKEN=<your read token> tools/.venv/bin/python eval/fetch_train_reals.py   # WikiArt + anime reals (public data; token only lifts rate limits)
+tools/.venv/bin/python eval/fetch_audit_reals.py 250                     # audit categories (memes, renders…)
+node tools/make-screenshots-train.mjs                                    # screenshot reals
 tools/.venv/bin/python eval/make_eval_split.py
 
 # 3. Fine-tune from the Community Forensics base weights (MIT)

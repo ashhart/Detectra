@@ -1,0 +1,14 @@
+/* Detectra content styles.
+   Intentionally minimal: all real UI lives inside a closed shadow root
+   (see content.js) so page CSS cannot interfere. This file only guards the
+   overlay host element itself. */
+detectra-overlay {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+}

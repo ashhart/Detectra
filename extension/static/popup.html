@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <style>
+    :root { color-scheme: dark; }
+    body {
+      width: 320px; margin: 0; padding: 14px 14px 12px;
+      background: #101218; color: #e5e9f0;
+      font: 13px/1.5 -apple-system, system-ui, "Segoe UI", sans-serif;
+    }
+    h1 { font-size: 15px; margin: 0; letter-spacing: .2px; }
+    .sub { color: #8b93a3; font-size: 11px; margin: 2px 0 12px; }
+    .card {
+      background: #171a22; border: 1px solid #232837; border-radius: 12px;
+      padding: 10px 12px; margin-bottom: 10px;
+    }
+    .row { display: flex; justify-content: space-between; align-items: center; margin: 4px 0; }
+    .row .v { font-weight: 600; }
+    .ok { color: #34d399; } .warn { color: #fbbf24; } .bad { color: #fb7185; }
+    .bar { height: 6px; background: #232837; border-radius: 4px; overflow: hidden; margin-top: 6px; display: none; }
+    .bar .fill { height: 100%; width: 0%; background: #7dd3fc; transition: width .2s; }
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; text-align: center; }
+    .stats .n { font-size: 17px; font-weight: 700; }
+    .stats .l { font-size: 10px; color: #8b93a3; }
+    button {
+      width: 100%; margin-top: 8px; padding: 8px 10px; border: 0; border-radius: 9px;
+      background: #2a3040; color: #e5e9f0; font: 600 12.5px system-ui; cursor: pointer;
+    }
+    button:hover { background: #333b4f; }
+    button.primary { background: #4f7cff; } button.primary:hover { background: #5d87ff; }
+    .foot { text-align: center; color: #626b7d; font-size: 10.5px; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h1>Detectra</h1>
+  <div class="sub">AI image detector · 100% on-device</div>
+
+  <div class="card" id="engine-card">
+    <div class="row"><span>Engine</span><span class="v" id="engine">…</span></div>
+    <div class="row"><span>Model</span><span class="v" id="model">…</span></div>
+    <div class="row"><span>Status</span><span class="v" id="status">…</span></div>
+    <div class="row"><span>Avg. speed</span><span class="v" id="speed">…</span></div>
+    <div class="bar" id="bar"><div class="fill" id="fill"></div></div>
+  </div>
+
+  <div class="card">
+    <div class="stats">
+      <div><div class="n" id="s-total">–</div><div class="l">analyzed</div></div>
+      <div><div class="n bad" id="s-ai">–</div><div class="l">AI</div></div>
+      <div><div class="n ok" id="s-real">–</div><div class="l">real</div></div>
+      <div><div class="n warn" id="s-unsure">–</div><div class="l">unsure</div></div>
+    </div>
+    <button id="rescan">Rescan this page</button>
+    <button id="toggle-site">Disable on this site</button>
+  </div>
+
+  <button class="primary" id="open-lab">Open Forensics Lab</button>
+  <div class="foot">no image ever leaves your device</div>
+  <script src="popup.js"></script>
+</body>
+</html>

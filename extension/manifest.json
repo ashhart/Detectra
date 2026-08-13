@@ -1,0 +1,52 @@
+{
+  "manifest_version": 3,
+  "name": "Detectra \u2014 AI Image Detector (100% on-device)",
+  "version": "0.1.0",
+  "description": "Spots AI-generated images as you browse, with a confidence score on every image. All inference runs locally via WebGPU/WASM \u2014 no image ever leaves your device.",
+  "minimum_chrome_version": "121",
+  "permissions": [
+    "storage",
+    "unlimitedStorage",
+    "contextMenus"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "css": [
+        "content.css"
+      ],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "assets/icon16.png",
+      "32": "assets/icon32.png",
+      "48": "assets/icon48.png",
+      "128": "assets/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "assets/icon16.png",
+    "32": "assets/icon32.png",
+    "48": "assets/icon48.png",
+    "128": "assets/icon128.png"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "name": "detectra",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Detectra — on-device AI image detector for Chrome (MV3). No cloud, no servers: WebGPU/WASM inference in the browser.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "watch": "node build.mjs --watch",
+    "zip": "node build.mjs --zip"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.0",
+    "puppeteer-core": "^25.6.0"
+  },
+  "dependencies": {
+    "onnxruntime-web": "1.21.0"
+  }
+}

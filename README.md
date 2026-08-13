@@ -1,0 +1,105 @@
+# Detectra — AI Image Detector for Chrome, 100% on-device
+
+Detectra spots AI-generated images while you browse and pins a confidence score
+on every image — with **all inference running inside your browser**. No cloud
+APIs, no local servers, no telemetry: after a one-time model download, Detectra
+works fully offline. Your images never leave your machine.
+
+Built for the [poidh "local AI challenge" bounty](https://poidh.xyz/arbitrum/bounty/323):
+a Manifest V3 extension that performs real neural-network inference via
+**WebGPU** (WASM fallback) and layers cryptographic provenance and metadata
+forensics on top.
+
+## How it works
+
+Every eligible image on a page goes through a four-signal forensic pipeline:
+
+1. **Neural pixel analysis** — a ViT-S/16 detector (fine-tuned from the MIT-licensed
+   [Community Forensics](https://github.com/JeongsooP/Community-Forensics) ViT,
+   CVPR 2025, trained across 4,800+ generators) runs at 384×384 via ONNX
+   Runtime Web on WebGPU. ~30ms/image on Apple Silicon; single-threaded WASM
+   fallback for machines without WebGPU.
+2. **C2PA / Content Credentials** — JUMBF manifests in JPEG/PNG/WebP are
+   detected and the claim generator parsed (DALL·E, Adobe Firefly, GPT-4o…).
+3. **Generator metadata forensics** — Stable Diffusion WebUI `parameters`
+   chunks, ComfyUI workflow graphs, NovelAI tags, Midjourney XMP job IDs,
+   EXIF `Software` fields, and the IPTC `digitalSourceType =
+   trainedAlgorithmicMedia` marker.
+4. **Score fusion + calibration** — the neural logit is Platt-calibrated so
+   the 65% displayed-confidence threshold sits at the balanced-accuracy
+   optimum; hard metadata evidence can only *raise* the score (absence of
+   metadata proves nothing, and camera EXIF is spoofable — it is surfaced as
+   context, never trusted).
+
+Hover any badge for the full forensic breakdown: neural score (raw and
+calibrated), every provenance signal found, engine (WebGPU/WASM), and timing.
+
+## Install
+
+```bash
+npm ci
+npm run build
+```
+
+Then in Chrome: `chrome://extensions` → enable **Developer mode** → **Load
+unpacked** → select `extension/dist`.
+
+On first run Detectra performs its one-time model download (~44MB, SHA-256
+verified) and caches it locally. Everything afterwards is fully offline.
+
+## Evaluate it yourself — Forensics Lab
+
+Click the Detectra icon → **Open Forensics Lab**. Drop a folder with `real/`
+and `ai/` subfolders and you get per-image scores, a confusion matrix,
+balanced accuracy at the 65% threshold — the bounty's exact evaluation
+protocol — and CSV export. Every image is analyzed locally.
+
+For automated evaluation, Detectra also stamps machine-readable attributes on
+every analyzed `<img>`:
+
+```html
+<img src="…" data-detectra-score="0.9871" data-detectra-verdict="ai" data-detectra-logit="4.32">
+```
+
+## Reproduce the model
+
+```bash
+# 1. Python env
+uv venv tools/.venv --python 3.12
+uv pip install --python tools/.venv/bin/python -r tools/requirements.txt
+
+# 2. Download the base weights (MIT) and export to ONNX (fp16, single file)
+tools/.venv/bin/hf download OwensLab/commfor-model-384 --local-dir tools/weights/commfor-384
+tools/.venv/bin/python tools/export_onnx.py \
+  --weights tools/weights/commfor-384/model.safetensors \
+  --out extension/models/model.onnx --fp16
+```
+
+The export script asserts PyTorch↔ONNX parity (max |Δlogit| < 0.05 fp16)
+before writing, and prints the SHA-256 that `models.json` pins.
+
+### Benchmark harness
+
+```bash
+node tools/e2e.mjs                 # smoke test: real Chrome, real extension
+node tools/bench.mjs eval/data/val # batch benchmark through the browser pipeline
+tools/.venv/bin/python eval/calibrate.py --apply  # fit Platt calibration
+```
+
+`tools/bench.mjs` runs the *actual extension* in Chrome for Testing against a
+labeled image folder and reports TPR/TNR/balanced accuracy at the 0.65
+threshold — measured through the same canvas preprocessing, WebGPU inference
+and fusion logic that a user (or evaluator) gets. We do not quote Python-side
+numbers: only the browser pipeline counts.
+
+## Privacy
+
+- Images are fetched and analyzed inside the extension. Nothing is uploaded.
+- After the initial model download, no network requests are made.
+- No analytics, no external scripts; the entire runtime is auditable in
+  `extension/dist` (built unminified on purpose).
+
+## License
+
+[MIT](LICENSE) — code, and the fine-tuned model weights.
+Base weights: [Community Forensics](https://huggingface.co/OwensLab/commfor-model-384) (MIT, Park & Owens, CVPR 2025).

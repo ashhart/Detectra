@@ -1,0 +1,17 @@
+{
+  "models": [
+    {
+      "id": "commfor-vits16-384",
+      "name": "Detectra detector v1 (ViT-S/16 @384)",
+      "url": "https://huggingface.co/PLACEHOLDER/detectra-detector/resolve/main/model.onnx",
+      "sha256": "TBD",
+      "bytes": 0,
+      "devLocal": "models/model.onnx",
+      "inputSize": 384,
+      "resize": 440,
+      "mean": [0.485, 0.456, 0.406],
+      "std": [0.229, 0.224, 0.225]
+    }
+  ],
+  "calibration": { "a": 1.0, "b": 0.0 }
+}

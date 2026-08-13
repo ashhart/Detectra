@@ -1,0 +1,11 @@
+node_modules/
+extension/dist/
+extension/models/*.onnx
+third_party/
+tools/.venv/
+tools/weights/
+tools/browsers/
+eval/data/
+*.zip
+.DS_Store
+__pycache__/

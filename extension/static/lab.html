@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Detectra — Forensics Lab</title>
+  <style>
+    :root { color-scheme: dark; }
+    body {
+      margin: 0; padding: 32px 40px; background: #0d0f14; color: #e5e9f0;
+      font: 14px/1.55 -apple-system, system-ui, "Segoe UI", sans-serif;
+    }
+    h1 { font-size: 22px; margin: 0 0 4px; }
+    .sub { color: #8b93a3; margin-bottom: 24px; }
+    .drop {
+      border: 2px dashed #2a3040; border-radius: 16px; padding: 48px; text-align: center;
+      color: #8b93a3; cursor: pointer; transition: all .2s;
+    }
+    .drop.over, .drop:hover { border-color: #4f7cff; color: #cdd6e4; background: #12151d; }
+    .hint { font-size: 12px; margin-top: 8px; color: #626b7d; }
+    #summary { display: none; margin: 24px 0; gap: 12px; grid-template-columns: repeat(5, 1fr); }
+    .stat { background: #171a22; border: 1px solid #232837; border-radius: 12px; padding: 14px; text-align: center; }
+    .stat .n { font-size: 24px; font-weight: 700; }
+    .stat .l { font-size: 11px; color: #8b93a3; margin-top: 2px; }
+    .ok { color: #34d399; } .bad { color: #fb7185; } .warn { color: #fbbf24; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 13px; }
+    th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid #1d222d; }
+    th { color: #8b93a3; font-weight: 600; font-size: 11.5px; text-transform: uppercase; letter-spacing: .4px; }
+    td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+    .pill { padding: 2px 9px; border-radius: 999px; font-size: 11.5px; font-weight: 600; }
+    .pill.ai { background: rgba(190,24,60,.25); color: #fda4af; }
+    .pill.real { background: rgba(5,102,54,.25); color: #6ee7b7; }
+    .pill.unsure { background: rgba(146,101,7,.25); color: #fcd34d; }
+    .pill.err { background: #232837; color: #8b93a3; }
+    button { padding: 8px 16px; border: 0; border-radius: 9px; background: #2a3040; color: #e5e9f0; font: 600 12.5px system-ui; cursor: pointer; margin-right: 8px; }
+    button:hover { background: #333b4f; }
+    #toolbar { display: none; margin-top: 20px; }
+    .note { font-size: 12px; color: #626b7d; margin-top: 6px; }
+    img.thumb { width: 44px; height: 44px; object-fit: cover; border-radius: 6px; vertical-align: middle; }
+  </style>
+</head>
+<body>
+  <h1>Forensics Lab</h1>
+  <div class="sub">
+    Batch-evaluate Detectra on your own images — entirely on-device.
+    Drop files, or a folder with <code>real/</code> and <code>ai/</code> (or <code>fake/</code>) subfolders
+    to score balanced accuracy at the 65% threshold.
+  </div>
+
+  <div class="drop" id="drop">
+    <div style="font-size:32px">⊹</div>
+    <div><b>Drop images or a folder here</b> — or click to choose</div>
+    <div class="hint">nothing is uploaded; every image is analyzed locally</div>
+    <input type="file" id="file-input" multiple accept="image/*" webkitdirectory style="display:none" />
+    <input type="file" id="file-input-flat" multiple accept="image/*" style="display:none" />
+  </div>
+
+  <div id="summary"></div>
+  <div id="toolbar">
+    <button id="export">Export CSV</button>
+    <button id="clear">Clear</button>
+    <span class="note">threshold: image is called AI when confidence ≥ 65% (bounty evaluation setting)</span>
+  </div>
+  <table id="results" style="display:none">
+    <thead>
+      <tr><th></th><th>File</th><th>Label</th><th>Verdict</th><th class="num">AI confidence</th><th class="num">Neural (raw)</th><th>Signals</th><th class="num">ms</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  <script src="lab.js"></script>
+</body>
+</html>

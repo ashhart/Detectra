@@ -2,7 +2,7 @@
   "models": [
     {
       "id": "detectra-v1-vits16-384",
-      "name": "Detectra detector v1 (ViT-S/16 @384, fp16)",
+      "name": "Detectra v1 (ViT-S/16 @384, fp16)",
       "url": "https://huggingface.co/Vontra/detectra-detector/resolve/main/model.onnx",
       "sha256": "94fac18030826da368304e0cd79ff831df3ab6e46f95463a84b19793a9d2692d",
       "bytes": 43684258,

@@ -23,7 +23,9 @@ threshold, on data the model never trained or calibrated on:
 | WildRF test, mangled (random 0.5–0.9× resize + JPEG q60–88) | **97.1%** |
 | Modern-generator eval split — DALL·E 3, Midjourney, Flux, SD3.5, Recraft, HiDream, **plus GPT-4o & Ideogram which the model never saw in training** | **98.3%** (TPR 100%) |
 
-The Detectra model is our own fine-tune of the MIT-licensed
+The Detectra model — published at
+[Vontra/detectra-v1](https://huggingface.co/Vontra/detectra-v1) — is our own
+fine-tune of the MIT-licensed
 [Community Forensics](https://github.com/JeongsooP/Community-Forensics) ViT-S/16
 (CVPR 2025), retrained on the current generation of image models with a
 web-realism augmentation policy (JPEG cascades, resize chains) and a replay
@@ -66,7 +68,8 @@ npm run build
 Then in Chrome: `chrome://extensions` → enable **Developer mode** → **Load
 unpacked** → select `extension/dist`.
 
-On first run Detectra performs its one-time model download (~44MB, SHA-256
+On first run Detectra performs its one-time model download (~44MB from
+[Vontra/detectra-v1](https://huggingface.co/Vontra/detectra-v1), SHA-256
 verified) and caches it locally. Everything afterwards is fully offline.
 
 ## Evaluate it yourself — Forensics Lab
@@ -130,5 +133,6 @@ numbers: only the browser pipeline counts.
 
 ## License
 
-[MIT](LICENSE) — code, and the fine-tuned model weights.
+[MIT](LICENSE) — code, and the fine-tuned model weights
+([Vontra/detectra-v1](https://huggingface.co/Vontra/detectra-v1)).
 Base weights: [Community Forensics](https://huggingface.co/OwensLab/commfor-model-384) (MIT, Park & Owens, CVPR 2025).

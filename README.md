@@ -19,9 +19,20 @@ threshold, on data the model never trained or calibrated on:
 
 | Benchmark | Balanced accuracy @0.65 |
 |---|---|
-| [WildRF](https://vision.huji.ac.il/ladeda/) test — 2,241 in-the-wild social-media images (Reddit/X/Facebook), fully held out | **97.6%** |
-| WildRF test, mangled (random 0.5–0.9× resize + JPEG q60–88) | **97.1%** |
-| Modern-generator eval split — DALL·E 3, Midjourney, Flux, SD3.5, Recraft, HiDream, **plus GPT-4o & Ideogram which the model never saw in training** | **98.3%** (TPR 100%) |
+| [WildRF](https://vision.huji.ac.il/ladeda/) test — 2,241 in-the-wild social-media images (Reddit/X/Facebook), fully held out | **97.0%** |
+| WildRF test, mangled (random 0.5–0.9× resize + JPEG q60–88) | **96.9%** |
+| Modern-generator eval split — DALL·E 3, Midjourney, Flux, SD3.5, Recraft, HiDream, **plus GPT-4o & Ideogram which the model never saw in training** | **99.4%** (TPR 98.9%) |
+
+Detectors notoriously call human artwork "AI". We audited difficult *real*
+categories explicitly and trained them out (v3); TNR = % of real images
+correctly kept:
+
+| Difficult reals (never in training) | TNR @0.65 |
+|---|---|
+| Human paintings & drawings (WikiArt, n=2,400) | **99.8%** |
+| Hand-drawn anime (n=250) | **100%** |
+| Memes (n=250) | **97.6%** |
+| Webpage screenshots (n=60) | **100%** |
 
 The Detectra model — published at
 [Vontra/detectra-v1](https://huggingface.co/Vontra/detectra-v1) — is our own

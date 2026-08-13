@@ -23,7 +23,7 @@ for cls in ("real", "ai"):
         old.unlink()
 
 n = 0
-for src_dir, cls in [(SRC / "real", "real"), (SRC / "ai", "ai"), (SRC / "art_reals" / "real", "real")]:
+for src_dir, cls in [(SRC / "real", "real"), (SRC / "ai", "ai"), (SRC / "art_reals" / "real", "real"), (SRC / "anime_reals" / "real", "real")]:
     if not src_dir.is_dir():
         continue
     for f in sorted(src_dir.iterdir()):

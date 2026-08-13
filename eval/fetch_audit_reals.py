@@ -49,8 +49,9 @@ def rows_api(dataset, image_key, n, config="default", split="train", per_page_ca
             try:
                 yield get(img["src"])
                 got += 1
+                time.sleep(0.3)  # stay under datasets-server rate limits
             except Exception:
-                pass
+                time.sleep(2)
             if got >= n:
                 break
 
@@ -62,11 +63,16 @@ def commons_category(category, n, before="2022-01-01T00:00:00Z"):
     cont = ""
     got = 0
     fails = 0
-    while got < n and fails < 6:
+    time.sleep(90)  # Commons clamps on burst traffic; arrive slowly
+    while got < n and fails < 10:
         q = (f"{base}?action=query&generator=categorymembers&gcmtitle=Category:{urllib.parse.quote(category)}"
              f"&gcmtype=file&gcmlimit=50&prop=imageinfo&iiprop=url|timestamp|size&format=json&maxlag=5{cont}")
         try:
             j = json.loads(get(q))
+            # maxlag exceeded comes back as HTTP 200 with an error object —
+            # treating it as an empty category silently kills the crawl.
+            if "error" in j:
+                raise RuntimeError(j["error"].get("code", "api-error"))
             fails = 0
         except Exception as e:
             fails += 1
@@ -80,7 +86,9 @@ def commons_category(category, n, before="2022-01-01T00:00:00Z"):
             ts, url, w = ii.get("timestamp", ""), ii.get("url", ""), ii.get("width", 0)
             if not url or ts >= before or w < 300:
                 continue
-            if not url.lower().endswith((".jpg", ".jpeg", ".png", ".webp")):
+            # Commons serves signed URLs with query strings (&ut=…) — judge the
+            # format by the file TITLE, not the URL tail.
+            if not p.get("title", "").lower().endswith((".jpg", ".jpeg", ".png", ".webp")):
                 continue
             try:
                 yield get(url)
@@ -97,10 +105,43 @@ def commons_category(category, n, before="2022-01-01T00:00:00Z"):
         time.sleep(1.5)
 
 
+def memes_files(n):
+    """hateful_memes_expanded stores 'img' as a repo-relative path; fetch the
+    raw files via resolve/ URLs (follows CDN redirect)."""
+    got = 0
+    for offset in range(0, 4000, 100):
+        if got >= n:
+            break
+        url = (f"https://datasets-server.huggingface.co/rows?dataset=limjiayi%2Fhateful_memes_expanded"
+               f"&config=default&split=train&offset={offset}&length=100")
+        try:
+            rows = json.loads(get(url))["rows"]
+        except Exception as e:
+            print(f"  page {offset} failed: {e}", file=sys.stderr)
+            time.sleep(30)
+            continue
+        for r in rows:
+            rel = r["row"].get("img")
+            if not rel:
+                continue
+            try:
+                req = urllib.request.Request(
+                    f"https://huggingface.co/datasets/limjiayi/hateful_memes_expanded/resolve/main/{rel}",
+                    headers=UA)
+                yield urllib.request.urlopen(req, timeout=60).read()  # urlopen follows redirects
+                got += 1
+                time.sleep(0.5)
+            except Exception:
+                time.sleep(3)
+            if got >= n:
+                break
+        time.sleep(2)
+
+
 CATEGORIES = {
     "anime": lambda n: rows_api("huggan/selfie2anime", "imageB", n),
-    "memes": lambda n: rows_api("limjiayi/hateful_memes_expanded", "img", n),
-    "render3d": lambda n: commons_category("Blender_renders", n),
+    "memes": memes_files,
+    "render3d": lambda n: commons_category("Blender_(software)", n),
     "gamescreens": lambda n: commons_category("Video_game_screenshots", n),
 }
 

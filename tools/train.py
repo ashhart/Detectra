@@ -149,6 +149,7 @@ def main() -> None:
         ROOT / "eval/data/val/ai": 1,          # modern gens (minus holdouts)
         ROOT / "eval/data/val/real": 0,        # COCO
         ROOT / "eval/data/val/art_reals/real": 0,  # human art — TNR guard
+        ROOT / "eval/data/val/anime_reals/real": 0,  # hand-drawn anime — TNR guard
     }, even_only=True)                          # odd indices reserved for eval
     train_items += collect({
         ROOT / "eval/data/WildRF/train/1_fake": 1,
@@ -172,10 +173,11 @@ def main() -> None:
         val_items.append((f, 1))
     # odd-indexed human art (never trained) — watch the art-TNR blind spot
     import re as _re
-    for f in (ROOT / "eval/data/val/art_reals/real").glob("*.jpg"):
-        m = _re.search(r"_(\d+)\.", f.name)
-        if m and int(m.group(1)) % 2 == 1:
-            val_items.append((f, 0))
+    for d, pat in [("art_reals", "*.jpg"), ("anime_reals", "*.png")]:
+        for f in (ROOT / "eval/data/val" / d / "real").glob(pat):
+            m = _re.search(r"_(\d+)\.", f.name)
+            if m and int(m.group(1)) % 2 == 1:
+                val_items.append((f, 0))
     print(f"val: {len(val_items)} images")
 
     model = build_model()

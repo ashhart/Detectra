@@ -4,7 +4,8 @@
 Training (tools/train.py) uses only EVEN-indexed files per source; this
 script symlinks the ODD-indexed complement — plus every image of the
 held-out generators (rapid_4o, rapid_ideogram), which are never trained on —
-into val-eval/{real,ai} for contamination-free benchmarking.
+into val-eval/{real,ai} for contamination-free benchmarking. Human-art reals
+(val/art_reals/real) feed val-eval/real under the same even/odd rule.
 """
 import re
 from pathlib import Path
@@ -15,19 +16,23 @@ DST = ROOT / "eval/data/val-eval"
 HOLDOUTS = ("rapid_4o", "rapid_ideogram")
 EXTS = {".png", ".jpg", ".jpeg", ".webp", ".bmp"}
 
-n = 0
 for cls in ("real", "ai"):
     out = DST / cls
     out.mkdir(parents=True, exist_ok=True)
     for old in out.iterdir():
         old.unlink()
-    for f in sorted((SRC / cls).iterdir()):
+
+n = 0
+for src_dir, cls in [(SRC / "real", "real"), (SRC / "ai", "ai"), (SRC / "art_reals" / "real", "real")]:
+    if not src_dir.is_dir():
+        continue
+    for f in sorted(src_dir.iterdir()):
         if f.suffix.lower() not in EXTS:
             continue
         m = re.search(r"_(\d+)\.\w+$", f.name)
         odd = m and int(m.group(1)) % 2 == 1
         holdout = f.name.startswith(HOLDOUTS)
         if odd or holdout:
-            (out / f.name).symlink_to(f.resolve())
+            (DST / cls / f.name).symlink_to(f.resolve())
             n += 1
 print(f"val-eval: {n} images")

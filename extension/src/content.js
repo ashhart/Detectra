@@ -4,8 +4,8 @@
 // All UI lives in a shadow root in a zero-size overlay container so page CSS
 // can't touch it and we can't break page layout.
 
-const MIN_NATURAL = 128; // ignore icons/sprites below this natural dimension
-const MIN_DISPLAY = 64; // and images rendered tiny
+const MIN_NATURAL = 64; // ignore icons/sprites below this natural dimension
+const MIN_DISPLAY = 40; // and images rendered tiny
 const AI_THRESHOLD = 0.65; // decision threshold for the AI verdict
 const REAL_THRESHOLD = 0.35;
 
@@ -66,6 +66,7 @@ function paintBadge(rec) {
 // ----------------------------------------------------------- auto-blur -----
 
 function applyBlur(rec) {
+  if (rec.isBg) return; // never blur arbitrary elements — they can contain text
   const shouldBlur = blurAI && !rec.revealed && rec.result && rec.result.p >= AI_THRESHOLD;
   if (shouldBlur && !rec.blurred) {
     rec.prevFilter = rec.img.style.filter || '';
@@ -269,9 +270,52 @@ function consider(img) {
   else img.addEventListener('load', start, { once: true });
 }
 
+/** Collect <img> elements including those inside open shadow roots. */
+function* allImages(root = document) {
+  const walker = root.querySelectorAll ? root.querySelectorAll('*') : [];
+  if (root === document) yield* document.images;
+  for (const el of walker) {
+    if (el.shadowRoot) {
+      for (const img of el.shadowRoot.querySelectorAll('img')) yield img;
+      yield* allImages(el.shadowRoot); // nested shadow roots
+    }
+  }
+}
+
+const bgChecked = new WeakSet();
+
+/** Track large elements rendered via CSS background-image (badge only, no blur). */
+function scanBackgrounds() {
+  const els = document.querySelectorAll('body *');
+  const cap = Math.min(els.length, 5000);
+  for (let i = 0; i < cap; i++) {
+    const el = els[i];
+    if (bgChecked.has(el) || tracked.has(el) || el instanceof HTMLImageElement) continue;
+    bgChecked.add(el);
+    const r = el.getBoundingClientRect();
+    if (r.width < 100 || r.height < 100) continue;
+    const bg = getComputedStyle(el).backgroundImage;
+    const m = bg && bg !== 'none' ? bg.match(/url\(["']?(https?:[^"')]+|data:image[^"')]+)["']?\)/) : null;
+    if (!m) continue;
+    const rec = { img: el, url: m[1], id: ++recId, status: 'pending', result: null, badge: null, heat: null, isBg: true };
+    tracked.set(el, rec);
+    rec.badge = makeBadge(rec);
+    position(rec);
+    const cached = byUrl.get(rec.url);
+    if (cached) {
+      rec.result = cached;
+      rec.status = 'done';
+      paintBadge(rec);
+    } else {
+      analyzeRecord(rec);
+    }
+  }
+}
+
 function sweep() {
   if (!enabled) return;
-  for (const img of document.images) consider(img);
+  for (const img of allImages()) consider(img);
+  scanBackgrounds();
 }
 
 function detach(img) {
@@ -368,6 +412,7 @@ async function init() {
   addEventListener('scroll', scheduleReposition, { passive: true, capture: true });
   addEventListener('resize', scheduleReposition, { passive: true });
   setInterval(scheduleReposition, 1500); // catch silent layout shifts
+  setInterval(scheduleSweep, 4000); // catch late shadow-DOM / background-image content
 }
 init();
 

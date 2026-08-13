@@ -76,6 +76,8 @@ SOURCES = {
     # ---- replay (written under cf_replay/, not val/) ---------------------
     "cfreplay_ai": ("cf_replay/ai", lambda n: cf_small(1)),
     "cfreplay_real": ("cf_replay/real", lambda n: cf_small(0)),
+    # ---- human art (TNR guard: real-but-not-photographic) ----------------
+    "wikiart": ("art_reals/real", lambda n: hf_stream("huggan/wikiart")),
     # ---- AI: modern generators (the hard cases) --------------------------
     # Rapidata preference sets: image1/image2 pairs, both AI-generated.
     "rapid_4o": ("ai", lambda n: hf_stream("Rapidata/OpenAI-4o_t2i_human_preference", image_keys=("image1", "image2"))),

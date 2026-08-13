@@ -43,8 +43,15 @@ HOLDOUT_PREFIXES = ("rapid_4o", "rapid_ideogram")  # never trained on
 
 # ----------------------------------------------------------- data -----------
 
-def collect(split_dirs):
-    """[(path, label)] from {dir: label} mapping, skipping holdouts."""
+import re
+
+def collect(split_dirs, even_only=False):
+    """[(path, label)] from {dir: label} mapping, skipping holdouts.
+
+    even_only: for dirs shared with the benchmark (eval/data/val), take only
+    even-indexed files per source — odd indices stay unseen for evaluation
+    (see eval/make_eval_split.py). Contamination guard.
+    """
     items = []
     for d, label in split_dirs.items():
         d = Path(d)
@@ -52,8 +59,13 @@ def collect(split_dirs):
             print(f"  WARN missing dir {d}")
             continue
         for f in d.rglob("*"):
-            if f.suffix.lower() in EXTS and not f.name.startswith(HOLDOUT_PREFIXES):
-                items.append((f, label))
+            if f.suffix.lower() not in EXTS or f.name.startswith(HOLDOUT_PREFIXES):
+                continue
+            if even_only:
+                m = re.search(r"_(\d+)\.\w+$", f.name)
+                if m and int(m.group(1)) % 2 == 1:
+                    continue
+            items.append((f, label))
     return items
 
 
@@ -136,6 +148,8 @@ def main() -> None:
     train_items = collect({
         ROOT / "eval/data/val/ai": 1,          # modern gens (minus holdouts)
         ROOT / "eval/data/val/real": 0,        # COCO
+    }, even_only=True)                          # odd indices reserved for eval
+    train_items += collect({
         ROOT / "eval/data/WildRF/train/1_fake": 1,
         ROOT / "eval/data/WildRF/train/0_real": 0,
     })

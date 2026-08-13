@@ -59,16 +59,16 @@ def coco_val(n):
 
 def cf_small(label):
     """Replay slice of CommunityForensics-Small (CC-BY-4.0, research use):
-    preserves the base model's breadth during fine-tuning."""
-    import base64
-
+    preserves the base model's breadth during fine-tuning.
+    NOTE: image_data streams as raw encoded-image bytes (the datasets-server
+    preview shows base64 only because JSON can't carry binary)."""
     from datasets import load_dataset
 
     want = str(label)
     ds = load_dataset("OwensLab/CommunityForensics-Small", split="train", streaming=True)
     for row in ds:
         if str(row.get("label")) == want and row.get("image_data"):
-            yield base64.b64decode(row["image_data"])
+            yield bytes(row["image_data"])
 
 
 SOURCES = {
@@ -85,7 +85,8 @@ SOURCES = {
     "rapid_hidream": ("ai", lambda n: hf_stream("Rapidata/Hidream_t2i_human_preference", image_keys=("image1", "image2"))),
     "midjourney": ("ai", lambda n: hf_stream("ehristoforu/midjourney-images")),
     "dalle3": ("ai", lambda n: hf_stream("OpenDatasets/dalle-3-dataset")),
-    "flux_sd35": ("ai", lambda n: hf_stream("data-is-better-together/open-image-preferences-v1", image_keys=("image", "chosen", "rejected"))),
+    "flux_sd35": ("ai", lambda n: hf_stream("data-is-better-together/open-image-preferences-v1", split="cleaned", image_keys=("image_quality_dev", "image_quality_sd"))),
+    "rapid_700k": ("ai", lambda n: hf_stream("Rapidata/700k_Human_Preference_Dataset_FLUX_SD3_MJ_DALLE3", split="train_0001", image_keys=("image1", "image2"))),
 }
 
 

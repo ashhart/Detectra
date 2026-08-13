@@ -36,7 +36,7 @@ if (!chromePath) throw new Error('run: npx @puppeteer/browsers install chrome@st
 // ---- tiny static server --------------------------------------------------
 const serveDir = process.argv[2]
   ? path.resolve(process.argv[2])
-  : path.join(root, 'third_party/community-forensics/test_images');
+  : path.join(root, 'tools/demo-images');
 const exts = { '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.gif': 'image/gif' };
 const images = readdirSync(serveDir).filter((f) => exts[path.extname(f).toLowerCase()]);
 if (!images.length) throw new Error(`no images in ${serveDir}`);

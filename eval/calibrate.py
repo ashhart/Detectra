@@ -3,7 +3,7 @@
 
 Reads eval/results/browser_scores.csv (from tools/bench.mjs, needs the logit
 column), fits Platt scaling p' = sigmoid(a·logit + b) by logistic regression,
-then shifts b so that the bounty-mandated 0.65 decision threshold lands
+then shifts b so that the 0.65 decision threshold lands
 exactly on the balanced-accuracy-optimal raw threshold.
 
 Honesty guard: fits on a random half, reports before/after balanced accuracy

@@ -1,8 +1,7 @@
 // Detectra — Forensics Lab.
 // Batch evaluation UI: drop labeled folders (real/ + ai|fake/) and get
 // balanced accuracy at the 65% threshold, per-image scores and CSV export.
-// Mirrors the bounty's evaluation methodology so anyone (including the
-// maintainers) can reproduce results locally.
+// Lets anyone reproduce evaluation results locally.
 
 const AI_THRESHOLD = 0.65;
 const rows = []; // {name, label:'real'|'ai'|null, p, pRaw, signals, ms, err, thumb}

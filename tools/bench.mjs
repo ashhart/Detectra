@@ -1,7 +1,7 @@
 // Detectra — browser-side batch benchmark.
 // Scores a labeled dataset THROUGH the real extension pipeline (Chrome for
 // Testing + service-worker WebGPU inference + canvas preprocessing), so the
-// numbers reflect exactly what the bounty maintainers would measure.
+// numbers reflect exactly what an external evaluator would measure.
 //
 // Usage:
 //   node tools/bench.mjs [dataDir] [--batch 150] [--out eval/results/browser_scores.csv]

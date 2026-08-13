@@ -1,8 +1,7 @@
 // Detectra — end-to-end test: launches real Chrome with the built extension,
 // serves a test page of images over localhost, and reads back the
 // data-detectra-score attributes the content script stamps on each image.
-// This is the same surface an automated benchmark (like the bounty
-// maintainers') would use.
+// This is the same surface an automated external benchmark would use.
 //
 // Usage:
 //   node tools/e2e.mjs                # built-in page from CF sample images

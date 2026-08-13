@@ -7,16 +7,15 @@ works fully offline. Your images never leave your machine.
 
 ![Detectra badges and forensics panel](docs/panel.png)
 
-Built for the [poidh "local AI challenge" bounty](https://poidh.xyz/arbitrum/bounty/323):
-a Manifest V3 extension that performs real neural-network inference via
+A Manifest V3 extension that performs real neural-network inference via
 **WebGPU** (WASM fallback) and layers cryptographic provenance and metadata
 forensics on top.
 
 ## Results
 
 Measured **through the real extension** (Chrome for Testing + the exact
-service-worker WebGPU pipeline a user gets), at the bounty's mandated 65%
-confidence threshold, on data the model never trained or calibrated on:
+service-worker WebGPU pipeline a user gets), at a 65% confidence decision
+threshold, on data the model never trained or calibrated on:
 
 | Benchmark | Balanced accuracy @0.65 |
 |---|---|
@@ -29,7 +28,7 @@ The Detectra model is our own fine-tune of the MIT-licensed
 (CVPR 2025), retrained on the current generation of image models with a
 web-realism augmentation policy (JPEG cascades, resize chains) and a replay
 slice of the original 4,800-generator corpus. Scores are Platt-calibrated so
-the mandated 0.65 decision threshold sits at the balanced-accuracy optimum.
+the 0.65 decision threshold sits at the balanced-accuracy optimum.
 Holdout discipline: GPT-4o and Ideogram never appear in training; WildRF-test
 is never touched by training *or* calibration.
 
@@ -74,8 +73,7 @@ verified) and caches it locally. Everything afterwards is fully offline.
 
 Click the Detectra icon → **Open Forensics Lab**. Drop a folder with `real/`
 and `ai/` subfolders and you get per-image scores, a confusion matrix,
-balanced accuracy at the 65% threshold — the bounty's exact evaluation
-protocol — and CSV export. Every image is analyzed locally.
+balanced accuracy at the 65% threshold, and CSV export. Every image is analyzed locally.
 
 For automated evaluation, Detectra also stamps machine-readable attributes on
 every analyzed `<img>`:

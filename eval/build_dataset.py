@@ -2,8 +2,7 @@
 """Assemble the Detectra validation set from public sources.
 
 Builds eval/data/val/{real,ai}/<source>_<idx>.<ext> with a manifest CSV.
-Sources are streamed from Hugging Face where possible and subsampled; nothing
-here touches the bounty's private benchmark — this is our own honest proxy,
+Sources are streamed from Hugging Face where possible and subsampled; an honest in-house proxy,
 weighted toward the modern generators (Flux, Midjourney, DALL-E 3, 4o) that
 defeat most existing detectors, plus web-realistic real photos.
 

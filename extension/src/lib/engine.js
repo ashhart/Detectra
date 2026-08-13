@@ -63,7 +63,7 @@ async function getModelBytes() {
   const hit = await cache.match(m.url);
   if (hit) return await hit.arrayBuffer();
 
-  // One-time download of public weights (allowed by bounty rules at setup).
+  // One-time download of public weights.
   setStatus('downloading', 0);
   const res = await fetch(m.url);
   if (!res.ok) throw new Error(`model download failed: HTTP ${res.status}`);

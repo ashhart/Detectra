@@ -6,7 +6,7 @@
 
 const MIN_NATURAL = 128; // ignore icons/sprites below this natural dimension
 const MIN_DISPLAY = 64; // and images rendered tiny
-const AI_THRESHOLD = 0.65; // bounty-mandated decision threshold
+const AI_THRESHOLD = 0.65; // decision threshold for the AI verdict
 const REAL_THRESHOLD = 0.35;
 
 const tracked = new Map(); // HTMLImageElement -> record

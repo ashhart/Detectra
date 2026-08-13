@@ -1,0 +1,49 @@
+{
+  "frozen_at": "2026-08-13T15:15:03.967582+00:00",
+  "model": {
+    "id": "detectra-v1-vits16-384",
+    "onnx_sha256": "94fac18030826da368304e0cd79ff831df3ab6e46f95463a84b19793a9d2692d",
+    "published": "https://huggingface.co/Vontra/detectra-v1/resolve/main/model.onnx"
+  },
+  "calibration": {
+    "a": 1.155016,
+    "b": 0.251282
+  },
+  "decision_threshold": 0.65,
+  "git_commit": "1afc590f8bf075c357ccc7ef54b99efd5e95deac",
+  "benchmarks": {
+    "art_reals.csv": {
+      "n_ai": 0,
+      "n_real": 400,
+      "tnr": 0.495
+    },
+    "ft_val_eval.csv": {
+      "n_ai": 1500,
+      "n_real": 149,
+      "tpr": 1.0,
+      "tnr": 0.9664,
+      "balanced_accuracy": 0.9832
+    },
+    "ft_val_mangled.csv": {
+      "n_ai": 1800,
+      "n_real": 298,
+      "tpr": 0.9894,
+      "tnr": 0.9899,
+      "balanced_accuracy": 0.9896
+    },
+    "ft_wildrf_test.csv": {
+      "n_ai": 1187,
+      "n_real": 1054,
+      "tpr": 0.9705,
+      "tnr": 0.982,
+      "balanced_accuracy": 0.9763
+    },
+    "ft_wildrf_test_mangled.csv": {
+      "n_ai": 1187,
+      "n_real": 1053,
+      "tpr": 0.9671,
+      "tnr": 0.9744,
+      "balanced_accuracy": 0.9708
+    }
+  }
+}

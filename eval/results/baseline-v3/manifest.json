@@ -1,0 +1,70 @@
+{
+  "frozen_at": "2026-08-13T17:15:12.207639+00:00",
+  "model": {
+    "id": "detectra-v3-vits16-384",
+    "onnx_sha256": "1414b9aafaa01a644ed706224973f09b53a1388282104409862df9893b1b962b",
+    "published": "https://huggingface.co/Vontra/detectra-v1/resolve/main/model.onnx"
+  },
+  "calibration": {
+    "a": 1.121656,
+    "b": 0.506874
+  },
+  "decision_threshold": 0.65,
+  "git_commit": "b7923b37daa6a47904ad065ec3b47657303a9c4d",
+  "training_note": "v3 = v2 mix + meme/screenshot reals; art+anime+memes+screens reals in train; 4o/Ideogram never trained; WildRF-test never in train/calib",
+  "benchmarks": {
+    "v3F_anime.csv": {
+      "n_ai": 0,
+      "n_real": 250,
+      "tnr": 1.0
+    },
+    "v3F_art_odd.csv": {
+      "n_ai": 0,
+      "n_real": 1200,
+      "tnr": 0.9967
+    },
+    "v3F_memes.csv": {
+      "n_ai": 0,
+      "n_real": 250,
+      "tnr": 0.976
+    },
+    "v3F_val_eval.csv": {
+      "n_ai": 1500,
+      "n_real": 2349,
+      "tpr": 0.9887,
+      "tnr": 0.9983,
+      "balanced_accuracy": 0.9935
+    },
+    "v3F_val_mangled.csv": {
+      "n_ai": 1800,
+      "n_real": 299,
+      "tpr": 0.9839,
+      "tnr": 0.9933,
+      "balanced_accuracy": 0.9886
+    },
+    "v3F_webscreens.csv": {
+      "n_ai": 0,
+      "n_real": 60,
+      "tnr": 1.0
+    },
+    "v3F_wikiart_all.csv": {
+      "n_ai": 0,
+      "n_real": 2400,
+      "tnr": 0.9983
+    },
+    "v3F_wildrf_mangled.csv": {
+      "n_ai": 1187,
+      "n_real": 1054,
+      "tpr": 0.9587,
+      "tnr": 0.9801,
+      "balanced_accuracy": 0.9694
+    },
+    "v3F_wildrf_test.csv": {
+      "n_ai": 1187,
+      "n_real": 1054,
+      "tpr": 0.9587,
+      "tnr": 0.982,
+      "balanced_accuracy": 0.9704
+    }
+  }
+}

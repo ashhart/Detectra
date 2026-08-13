@@ -8,7 +8,7 @@ import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
-const out = path.join(root, 'eval', 'data', 'audit-reals', 'webscreens', 'real');
+const out = path.join(root, 'eval', 'data', 'calib-reals-ws', 'real');
 mkdirSync(out, { recursive: true });
 
 const chromeBase = path.join(root, 'tools', 'browsers', 'chrome');
@@ -17,6 +17,12 @@ const chromePath = readdirSync(chromeBase).sort().reverse()
   .find(existsSync);
 
 const SITES = [
+  'https://en.wikipedia.org/wiki/Astronomy',
+  'https://en.wikipedia.org/wiki/Cooking',
+  'https://developer.mozilla.org/en-US/docs/Web/JavaScript',
+  'https://github.com/microsoft/vscode',
+  'https://www.w3.org/TR/CSS22/',
+  'https://archive.org/details/texts',
   'https://en.wikipedia.org/wiki/Photography',
   'https://en.wikipedia.org/wiki/Renaissance',
   'https://developer.mozilla.org/en-US/docs/Web/CSS',

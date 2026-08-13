@@ -154,6 +154,10 @@ def main() -> None:
     train_items += collect({
         ROOT / "eval/data/WildRF/train/1_fake": 1,
         ROOT / "eval/data/WildRF/train/0_real": 0,
+        # meme + screenshot reals: training-only pulls, disjoint by offset/site
+        # from the audit (reporting) and calibration sets
+        ROOT / "eval/data/val/meme_reals/real": 0,
+        ROOT / "eval/data/val/ws_reals/real": 0,
     })
     replay = collect({Path(args.replay_dir) / "ai": 1, Path(args.replay_dir) / "real": 0})
     train_items += replay

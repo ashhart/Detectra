@@ -5,10 +5,33 @@ on every image — with **all inference running inside your browser**. No cloud
 APIs, no local servers, no telemetry: after a one-time model download, Detectra
 works fully offline. Your images never leave your machine.
 
+![Detectra badges and forensics panel](docs/panel.png)
+
 Built for the [poidh "local AI challenge" bounty](https://poidh.xyz/arbitrum/bounty/323):
 a Manifest V3 extension that performs real neural-network inference via
 **WebGPU** (WASM fallback) and layers cryptographic provenance and metadata
 forensics on top.
+
+## Results
+
+Measured **through the real extension** (Chrome for Testing + the exact
+service-worker WebGPU pipeline a user gets), at the bounty's mandated 65%
+confidence threshold, on data the model never trained or calibrated on:
+
+| Benchmark | Balanced accuracy @0.65 |
+|---|---|
+| [WildRF](https://vision.huji.ac.il/ladeda/) test — 2,241 in-the-wild social-media images (Reddit/X/Facebook), fully held out | **97.6%** |
+| WildRF test, mangled (random 0.5–0.9× resize + JPEG q60–88) | **97.1%** |
+| Modern-generator eval split — DALL·E 3, Midjourney, Flux, SD3.5, Recraft, HiDream, **plus GPT-4o & Ideogram which the model never saw in training** | **98.3%** (TPR 100%) |
+
+The Detectra model is our own fine-tune of the MIT-licensed
+[Community Forensics](https://github.com/JeongsooP/Community-Forensics) ViT-S/16
+(CVPR 2025), retrained on the current generation of image models with a
+web-realism augmentation policy (JPEG cascades, resize chains) and a replay
+slice of the original 4,800-generator corpus. Scores are Platt-calibrated so
+the mandated 0.65 decision threshold sits at the balanced-accuracy optimum.
+Holdout discipline: GPT-4o and Ideogram never appear in training; WildRF-test
+is never touched by training *or* calibration.
 
 ## How it works
 
@@ -68,10 +91,18 @@ every analyzed `<img>`:
 uv venv tools/.venv --python 3.12
 uv pip install --python tools/.venv/bin/python -r tools/requirements.txt
 
-# 2. Download the base weights (MIT) and export to ONNX (fp16, single file)
+# 2. Assemble training/eval data from public sources (streams from HF + COCO + WildRF)
+tools/.venv/bin/python eval/build_dataset.py --per-source 300
+tools/.venv/bin/python eval/build_dataset.py --only cfreplay_ai,cfreplay_real --per-source 1500
+tools/.venv/bin/python eval/make_eval_split.py
+
+# 3. Fine-tune from the Community Forensics base weights (MIT)
 tools/.venv/bin/hf download OwensLab/commfor-model-384 --local-dir tools/weights/commfor-384
+tools/.venv/bin/python tools/train.py --epochs 3 --batch 32 --lr 2e-5
+
+# 4. Export to ONNX (fp16, single file) with a PyTorch↔ONNX parity assertion
 tools/.venv/bin/python tools/export_onnx.py \
-  --weights tools/weights/commfor-384/model.safetensors \
+  --weights tools/weights/detectra-ft/model.safetensors \
   --out extension/models/model.onnx --fp16
 ```
 

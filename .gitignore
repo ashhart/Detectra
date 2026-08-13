@@ -9,3 +9,4 @@ eval/data/
 *.zip
 .DS_Store
 __pycache__/
+tools/.audit-terms

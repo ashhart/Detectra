@@ -64,12 +64,28 @@ $('toggle-site').onclick = async () => {
 
 $('open-lab').onclick = () => chrome.runtime.sendMessage({ target: 'bg', type: 'open-lab' });
 
+async function refreshBlur() {
+  const { blurAI = true } = await chrome.storage.local.get('blurAI');
+  $('toggle-blur').textContent = `Blur AI images: ${blurAI ? 'on' : 'off'}`;
+  return blurAI;
+}
+$('toggle-blur').onclick = async () => {
+  const blurAI = !(await refreshBlur());
+  await chrome.storage.local.set({ blurAI });
+  const tabs = await chrome.tabs.query({});
+  for (const t of tabs) {
+    if (t.id != null) chrome.tabs.sendMessage(t.id, { type: 'set-blur', blurAI }).catch(() => {});
+  }
+  refreshBlur();
+};
+
 chrome.runtime.onMessage.addListener((msg) => {
   if (msg?.target === 'broadcast' && msg.type === 'engine-status') renderStatus(msg);
 });
 
 (async function init() {
   refreshSiteToggle();
+  refreshBlur();
   refreshStats();
   const s = await chrome.runtime.sendMessage({ target: 'bg', type: 'engine-status' }).catch(() => null);
   renderStatus(s);

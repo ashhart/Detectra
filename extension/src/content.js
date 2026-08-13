@@ -11,6 +11,7 @@ const REAL_THRESHOLD = 0.35;
 
 const tracked = new Map(); // HTMLImageElement -> record
 let recId = 0;
+let blurAI = true; // auto-blur images called AI at the 65% threshold (toggle in popup)
 const byUrl = new Map(); // url -> result (page-local cache)
 let overlayRoot = null; // ShadowRoot
 let enabled = true;
@@ -54,11 +55,50 @@ function paintBadge(rec) {
     const [cls, txt] = labelFor(rec.result.p);
     el.className = `badge ${cls}`;
     el.querySelector('.txt').textContent = txt;
+    applyBlur(rec);
   } else if (rec.status === 'error') {
     el.className = 'badge err';
     el.querySelector('.txt').textContent = '–';
     el.title = rec.error || 'analysis failed';
   }
+}
+
+// ----------------------------------------------------------- auto-blur -----
+
+function applyBlur(rec) {
+  const shouldBlur = blurAI && !rec.revealed && rec.result && rec.result.p >= AI_THRESHOLD;
+  if (shouldBlur && !rec.blurred) {
+    rec.prevFilter = rec.img.style.filter || '';
+    rec.img.style.setProperty('filter', 'blur(18px) saturate(.85)', 'important');
+    rec.blurred = true;
+    if (!rec.reveal) {
+      const chip = document.createElement('div');
+      chip.className = 'reveal';
+      chip.textContent = 'AI image — click to reveal';
+      chip.addEventListener('click', () => {
+        rec.revealed = true;
+        applyBlur(rec);
+      });
+      ensureOverlay().appendChild(chip);
+      rec.reveal = chip;
+    }
+    positionReveal(rec);
+  } else if (!shouldBlur && rec.blurred) {
+    rec.img.style.setProperty('filter', rec.prevFilter);
+    if (!rec.prevFilter) rec.img.style.removeProperty('filter');
+    rec.blurred = false;
+    rec.reveal?.remove();
+    rec.reveal = null;
+  }
+}
+
+function positionReveal(rec) {
+  if (!rec.reveal) return;
+  const r = rec.img.getBoundingClientRect();
+  const visible = r.width >= MIN_DISPLAY && r.bottom > 0 && r.top < innerHeight && rec.img.isConnected;
+  rec.reveal.style.display = visible ? 'flex' : 'none';
+  if (!visible) return;
+  rec.reveal.style.transform = `translate(${r.left + scrollX + r.width / 2}px, ${r.top + scrollY + r.height / 2}px)`;
 }
 
 function position(rec) {
@@ -76,7 +116,10 @@ function position(rec) {
 
 function repositionAll() {
   rafPending = false;
-  for (const rec of tracked.values()) position(rec);
+  for (const rec of tracked.values()) {
+    position(rec);
+    positionReveal(rec);
+  }
 }
 function scheduleReposition() {
   if (!rafPending) {
@@ -235,6 +278,11 @@ function detach(img) {
   const rec = tracked.get(img);
   if (rec) {
     rec.badge?.remove();
+    rec.reveal?.remove();
+    if (rec.blurred) {
+      rec.img.style.setProperty('filter', rec.prevFilter || '');
+      if (!rec.prevFilter) rec.img.style.removeProperty('filter');
+    }
     tracked.delete(img);
   }
 }
@@ -296,12 +344,18 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     if (!enabled) for (const img of [...tracked.keys()]) detach(img);
     else sweep();
     sendResponse({ ok: true });
+  } else if (msg?.type === 'set-blur') {
+    blurAI = msg.blurAI;
+    for (const rec of tracked.values()) applyBlur(rec);
+    scheduleReposition();
+    sendResponse({ ok: true });
   }
   return false;
 });
 
 async function init() {
-  const { siteDisabled = {} } = await chrome.storage.local.get('siteDisabled');
+  const { siteDisabled = {}, blurAI: storedBlur } = await chrome.storage.local.get(['siteDisabled', 'blurAI']);
+  if (typeof storedBlur === 'boolean') blurAI = storedBlur;
   if (siteDisabled[location.hostname]) enabled = false;
   if (!enabled) return;
   sweep();
@@ -363,4 +417,13 @@ const BADGE_CSS = `
   position: absolute; top: 0; left: 0; display: grid; pointer-events: none;
   border-radius: 4px; overflow: hidden; mix-blend-mode: normal;
 }
+.reveal {
+  position: absolute; top: 0; left: 0; margin: -14px 0 0 -86px; /* centers on translate point */
+  display: flex; align-items: center; padding: 6px 13px; border-radius: 999px;
+  font: 600 12px/1.3 -apple-system, system-ui, "Segoe UI", sans-serif;
+  color: #fff; background: rgba(20,22,28,.88); backdrop-filter: blur(4px);
+  box-shadow: 0 2px 10px rgba(0,0,0,.4), inset 0 0 0 1px rgba(255,255,255,.16);
+  cursor: pointer; pointer-events: auto; user-select: none; white-space: nowrap;
+}
+.reveal:hover { background: rgba(30,33,42,.95); }
 `;

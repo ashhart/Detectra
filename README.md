@@ -58,6 +58,12 @@ Every eligible image on a page goes through a four-signal forensic pipeline:
 Hover any badge for the full forensic breakdown: neural score (raw and
 calibrated), every provenance signal found, engine (WebGPU/WASM), and timing.
 
+Images called AI at the 65% threshold are also **auto-blurred** with a
+click-to-reveal chip (toggle it from the popup), so synthetic content never
+ambushes you mid-scroll:
+
+![Auto-blur with click-to-reveal](docs/badges.png)
+
 ## Install
 
 ```bash
